@@ -6,6 +6,7 @@ import { useTheme } from 'next-themes';
 import useSWR from 'swr';
 import { Imovel } from '../types/api';
 import { X, Plus, Minus } from 'lucide-react';
+import { LoadingIndicator } from './loading-indicator';
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -112,8 +113,8 @@ const Map = ({ searchTerm }: MapProps) => {
         }
     };
 
-    if (loadError) return <div>Erro ao carregar o mapa. Verifique a sua chave de API.</div>;
-    if (!isLoaded) return <div>A carregar API do mapa...</div>;
+    if (loadError) return <div>Erro ao carregar o mapa. Tente mais tarde.</div>;
+    if (!isLoaded) return <LoadingIndicator />;
 
     return (
         <div className="relative">
