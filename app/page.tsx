@@ -4,11 +4,11 @@ import { useState, Suspense } from 'react';
 import dynamic from 'next/dynamic';
 import { SearchBar } from '../components/search-bar';
 import { ThemeToggle } from '../components/theme-toggle';
-import { LoadingIndicator } from '../components/loading-indicator'; // Importar o novo componente
+import { LoadingIndicator } from '../components/loading-indicator';
 
 const MapWithNoSSR = dynamic(() => import('../components/map'), {
     ssr: false,
-    loading: () => <LoadingIndicator />, // Usar o novo componente aqui
+    loading: () => <LoadingIndicator />,
 });
 
 export default function HomePage() {

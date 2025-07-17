@@ -16,11 +16,10 @@ export function SearchBar({ onSearch }: SearchBarProps) {
     };
 
     return (
-        // Aplicando estilos diretamente para garantir a aplicação
         <div className="w-full">
             <form
                 onSubmit={handleSearch}
-                className="flex w-full items-center rounded-full bg-background shadow-lg border border-border transition-all duration-300 focus-within:ring-2 focus-within:ring-ring focus-within:shadow-xl"
+                className="flex w-full items-center rounded-sm bg-background shadow-lg border border-border transition-all duration-300 focus-within:ring-2 focus-within:ring-ring focus-within:shadow-xl"
             >
                 <input
                     type="text"
@@ -31,7 +30,7 @@ export function SearchBar({ onSearch }: SearchBarProps) {
                 />
                 <button
                     type="submit"
-                    className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground transition-colors hover:bg-primary/90"
+                    className="flex h-12 w-12 items-center justify-center rounded-sm bg-primary text-primary-foreground transition-colors hover:bg-primary/90"
                     aria-label="Buscar"
                 >
                     <Search size={20} />
