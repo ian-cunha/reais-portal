@@ -98,6 +98,10 @@ const Map = ({ searchTerm }: MapProps) => {
         disableDefaultUI: true,
         zoomControl: false,
         styles: theme === 'dark' ? darkMapStyles : lightMapStyles,
+        // --- ALTERAÇÃO AQUI ---
+        // 'greedy': permite arrastar com 1 dedo no mobile
+        // 'cooperative': comportamento padrão (2 dedos para mover) no desktop
+        gestureHandling: isDesktop ? 'cooperative' : 'greedy',
     };
 
     const iconColor = theme === 'dark' ? '#FFA500' : '#fa581a';
