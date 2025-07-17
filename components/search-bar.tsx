@@ -16,7 +16,7 @@ export function SearchBar({ onSearch }: SearchBarProps) {
     };
 
     return (
-        <div className="w-full">
+        <div className="w-full transition-opacity duration-300 opacity-60 hover:opacity-100 focus-within:opacity-100">
             <form
                 onSubmit={handleSearch}
                 className="flex w-full items-center rounded-sm bg-background shadow-lg border border-border transition-all duration-300 focus-within:ring-2 focus-within:ring-ring focus-within:shadow-xl"

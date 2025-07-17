@@ -5,7 +5,7 @@ export interface Imovel {
     preco: number;
     localizacao: string; // "lat,lng"
     urlFotoDestaque: string;
-    tipo: 'casa' | 'empreendimento';
+    tipo: 'imovel' | 'empreendimento';
     urlFicha: string;
     unidadesTotal: number;
     unidadesDisponiveis: number;

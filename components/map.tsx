@@ -30,15 +30,17 @@ const useIsDesktop = () => {
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-const houseIconSvg = (color: string) => `
-  <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="${color}" stroke="white" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
-    <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-    <polyline points="9 22 9 12 15 12 15 22"/>
+const empreendimentoIcon = () => `
+  <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="#fa581a" stroke="white" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+    <rect width="16" height="20" x="4" y="2" rx="2" ry="2" />
+    <path d="M9 22v-4h6v4" /><path d="M8 6h.01" /><path d="M16 6h.01" />
+    <path d="M12 6h.01" /><path d="M12 10h.01" /><path d="M12 14h.01" />
+    <path d="M16 10h.01" /><path d="M16 14h.01" /><path d="M8 10h.01" /><path d="M8 14h.01" />
   </svg>
 `;
 
-const buildingIconSvg = (color: string) => `
-  <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="${color}" stroke="white" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+const imovelIcon = () => `
+  <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="#FFA500" stroke="white" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
     <rect width="16" height="20" x="4" y="2" rx="2" ry="2" />
     <path d="M9 22v-4h6v4" /><path d="M8 6h.01" /><path d="M16 6h.01" />
     <path d="M12 6h.01" /><path d="M12 10h.01" /><path d="M12 14h.01" />
@@ -104,10 +106,9 @@ const Map = ({ searchTerm }: MapProps) => {
         gestureHandling: isDesktop ? 'cooperative' : 'greedy',
     };
 
-    const iconColor = theme === 'dark' ? '#FFA500' : '#fa581a';
 
-    const getIcon = (tipo: 'casa' | 'empreendimento') => {
-        const svg = tipo === 'casa' ? houseIconSvg(iconColor) : buildingIconSvg(iconColor);
+    const getIcon = (tipo: 'imovel' | 'empreendimento') => {
+        const svg = tipo === 'empreendimento' ? empreendimentoIcon() : imovelIcon();
         return {
             url: 'data:image/svg+xml;base64,' + btoa(svg),
             scaledSize: new window.google.maps.Size(36, 36)
