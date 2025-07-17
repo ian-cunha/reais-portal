@@ -6,7 +6,7 @@ import "../styles/globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-    title: "Reais Portal",
+    title: "RE.AI.s LISTING",
     description: "Encontre o imóvel dos seus sonhos",
 };
 

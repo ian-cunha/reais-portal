@@ -14,7 +14,7 @@ export function LoadingIndicator() {
                 />
             </div>
             <p className="mt-4 text-lg font-medium text-muted-foreground animate-pulse">
-                RE.AI.s Portal
+                RE.AI.s LISTING
             </p>
         </div>
     );
