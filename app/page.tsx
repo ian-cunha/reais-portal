@@ -1,26 +1,22 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import dynamic from 'next/dynamic';
 import { SearchBar } from '../components/search-bar';
 import { ThemeToggle } from '../components/theme-toggle';
+import { LoadingIndicator } from '../components/loading-indicator'; // Importar o novo componente
 
 const MapWithNoSSR = dynamic(() => import('../components/map'), {
     ssr: false,
-    loading: () => (
-        <div className="flex items-center justify-center h-screen w-screen bg-muted">
-            <p className="text-muted-foreground">A carregar o mapa...</p>
-        </div>
-    ),
+    loading: () => <LoadingIndicator />, // Usar o novo componente aqui
 });
 
 export default function HomePage() {
     const [searchTerm, setSearchTerm] = useState('');
 
     return (
-        <div className="relative h-screen w-screen">
-            {/* Container para a barra de pesquisa e o botão de tema */}
-            <div className="absolute top-0 left-0 right-0 z-10 p-4">
+        <div className="relative h-screen w-screen overflow-hidden">
+            <header className="absolute top-0 left-0 right-0 z-10 p-4">
                 <div className="flex items-center justify-center gap-4 max-w-2xl mx-auto">
                     <div className="flex-grow">
                         <SearchBar onSearch={setSearchTerm} />
@@ -29,10 +25,12 @@ export default function HomePage() {
                         <ThemeToggle />
                     </div>
                 </div>
-            </div>
+            </header>
 
             <main>
-                <MapWithNoSSR searchTerm={searchTerm} />
+                <Suspense fallback={<LoadingIndicator />}>
+                    <MapWithNoSSR searchTerm={searchTerm} />
+                </Suspense>
             </main>
         </div>
     );

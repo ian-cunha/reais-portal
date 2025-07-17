@@ -1,24 +1,17 @@
-export interface ApiResponse<T> {
-    mensagem: string;
-    [key: string]: T | string;
-}
-
 export interface Imovel {
     codigoImovel: string;
     nomeImovel: string;
+    construtora: string;
     preco: number;
-    endereco: string;
-    localizacao: string;
-    nomeBairro: string;
-    nomeCidade: string;
-    siglaEstado: string;
+    localizacao: string; // "lat,lng"
     urlFotoDestaque: string;
-}
-
-export interface FiltroImovel {
-    token: string;
-    quantidadeImoveis: number;
-    paginado: boolean;
-    temFoto: "s" | "n";
-    termo?: string;
+    tipo: 'casa' | 'empreendimento';
+    urlFicha: string;
+    unidadesTotal: number;
+    unidadesDisponiveis: number;
+    quartos: number;
+    area: number;
+    vgv: string;
+    categoria: string;
+    estagio: string;
 }

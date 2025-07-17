@@ -1,12 +1,29 @@
 "use client";
 
 import React, { useState, useCallback } from 'react';
-import { GoogleMap, useJsApiLoader, MarkerF, InfoWindowF } from '@react-google-maps/api';
+import { GoogleMap, useJsApiLoader, MarkerF, OverlayView, MarkerClustererF } from '@react-google-maps/api';
 import { useTheme } from 'next-themes';
 import useSWR from 'swr';
 import { Imovel } from '../types/api';
+import { X } from 'lucide-react';
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
+
+const houseIconSvg = (color: string) => `
+  <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="${color}" stroke="white" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+    <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+    <polyline points="9 22 9 12 15 12 15 22"/>
+  </svg>
+`;
+
+const buildingIconSvg = (color: string) => `
+  <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="${color}" stroke="white" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+    <rect width="16" height="20" x="4" y="2" rx="2" ry="2" />
+    <path d="M9 22v-4h6v4" /><path d="M8 6h.01" /><path d="M16 6h.01" />
+    <path d="M12 6h.01" /><path d="M12 10h.01" /><path d="M12 14h.01" />
+    <path d="M16 10h.01" /><path d="M16 14h.01" /><path d="M8 10h.01" /><path d="M8 14h.01" />
+  </svg>
+`;
 
 const containerStyle: React.CSSProperties = {
     width: '100vw',
@@ -18,37 +35,23 @@ const center = {
     lng: -34.877022
 };
 
-// Estilos para o mapa claro
 const lightMapStyles: google.maps.MapTypeStyle[] = [
     { featureType: "poi.business", stylers: [{ visibility: "off" }] },
     { featureType: "road", elementType: "labels.icon", stylers: [{ visibility: "off" }] }
 ];
 
-// Estilos para o mapa escuro
 const darkMapStyles: google.maps.MapTypeStyle[] = [
     { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
     { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
     { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
-    {
-        featureType: "administrative.locality",
-        elementType: "labels.text.fill",
-        stylers: [{ color: "#d59563" }],
-    },
-    { featureType: "poi", elementType: "labels.text.fill", stylers: [{ color: "#d59563" }] },
-    { featureType: "poi.business", stylers: [{ "visibility": "off" }] },
+    { featureType: "administrative.locality", elementType: "labels.text.fill", stylers: [{ color: "#d59563" }] },
     { featureType: "poi.park", elementType: "geometry", stylers: [{ color: "#263c3f" }] },
     { featureType: "poi.park", elementType: "labels.text.fill", stylers: [{ color: "#6b9a76" }] },
     { featureType: "road", elementType: "geometry", stylers: [{ color: "#38414e" }] },
     { featureType: "road", elementType: "geometry.stroke", stylers: [{ color: "#212a37" }] },
     { featureType: "road", elementType: "labels.text.fill", stylers: [{ color: "#9ca5b3" }] },
-    { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#746855" }] },
-    { featureType: "road.highway", elementType: "geometry.stroke", stylers: [{ color: "#1f2835" }] },
-    { featureType: "road.highway", elementType: "labels.text.fill", stylers: [{ color: "#f3d19c" }] },
-    { featureType: "transit", elementType: "geometry", stylers: [{ color: "#2f3948" }] },
-    { featureType: "transit.station", elementType: "labels.text.fill", stylers: [{ color: "#d59563" }] },
     { featureType: "water", elementType: "geometry", stylers: [{ color: "#17263c" }] },
     { featureType: "water", elementType: "labels.text.fill", stylers: [{ color: "#515c6d" }] },
-    { featureType: "water", elementType: "labels.text.stroke", stylers: [{ color: "#17263c" }] },
 ];
 
 interface MapProps {
@@ -59,12 +62,13 @@ const Map = ({ searchTerm }: MapProps) => {
     const { theme } = useTheme();
     const { isLoaded, loadError } = useJsApiLoader({
         id: 'google-map-script',
-        googleMapsApiKey: process.env.NEXT_PUBLIC_Maps_API_KEY || ""
+        googleMapsApiKey: process.env.NEXT_PUBLIC_Maps_API_KEY || "",
+        libraries: ['marker'], // É importante carregar a biblioteca 'marker'
     });
 
     const [selectedImovel, setSelectedImovel] = useState<Imovel | null>(null);
 
-    const { data: imoveis, error: swrError } = useSWR<Imovel[]>(
+    const { data: imoveis } = useSWR<Imovel[]>(
         `/api/imoveis?termo=${searchTerm}`,
         fetcher
     );
@@ -75,6 +79,16 @@ const Map = ({ searchTerm }: MapProps) => {
         styles: theme === 'dark' ? darkMapStyles : lightMapStyles,
     };
 
+    const iconColor = theme === 'dark' ? '#FFA500' : '#fa581a';
+
+    const getIcon = (tipo: 'casa' | 'empreendimento') => {
+        const svg = tipo === 'casa' ? houseIconSvg(iconColor) : buildingIconSvg(iconColor);
+        return {
+            url: 'data:image/svg+xml;base64,' + btoa(svg),
+            scaledSize: new window.google.maps.Size(36, 36)
+        };
+    };
+
     if (loadError) return <div>Erro ao carregar o mapa. Verifique a sua chave de API.</div>;
     if (!isLoaded) return <div>A carregar API do mapa...</div>;
 
@@ -82,53 +96,90 @@ const Map = ({ searchTerm }: MapProps) => {
         <GoogleMap
             mapContainerStyle={containerStyle}
             center={center}
-            zoom={12}
+            zoom={10} // Zoom inicial um pouco mais afastado para ver o cluster
             options={mapOptions}
         >
-            {imoveis?.map((imovel) => {
-                const [lat, lng] = imovel.localizacao.split(',').map(Number);
-                if (isNaN(lat) || isNaN(lng)) return null;
+            {/* --- INÍCIO DA ALTERAÇÃO PARA CLUSTER --- */}
+            <MarkerClustererF>
+                {(clusterer) => (
+                    <>
+                        {imoveis?.map((imovel) => {
+                            const [lat, lng] = imovel.localizacao.split(',').map(Number);
+                            if (isNaN(lat) || isNaN(lng)) return null;
 
-                return (
-                    <MarkerF
-                        key={imovel.codigoImovel}
-                        position={{ lat, lng }}
-                        onClick={() => setSelectedImovel(imovel)}
-                        icon={{
-                            url: 'data:image/svg+xml;base64,' + btoa(`
-                                <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="${theme === 'dark' ? '#A5B4FC' : '#1D4ED8'}" stroke="${theme === 'dark' ? '#1E293B' : 'white'}" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-                                    <polyline points="9 22 9 12 15 12 15 22"/>
-                                </svg>
-                            `),
-                            scaledSize: new window.google.maps.Size(36, 36)
-                        }}
-                    />
-                );
-            })}
+                            return (
+                                <MarkerF
+                                    key={imovel.codigoImovel}
+                                    position={{ lat, lng }}
+                                    onClick={() => setSelectedImovel(imovel)}
+                                    icon={getIcon(imovel.tipo)}
+                                    clusterer={clusterer}
+                                />
+                            );
+                        })}
+                    </>
+                )}
+            </MarkerClustererF>
+            {/* --- FIM DA ALTERAÇÃO PARA CLUSTER --- */}
 
             {selectedImovel && (
-                <InfoWindowF
+                <OverlayView
                     position={{
                         lat: parseFloat(selectedImovel.localizacao.split(',')[0]),
                         lng: parseFloat(selectedImovel.localizacao.split(',')[1])
                     }}
-                    onCloseClick={() => setSelectedImovel(null)}
-                    options={{ pixelOffset: new window.google.maps.Size(0, -38) }}
+                    mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
                 >
-                    <div className="bg-background text-foreground p-1 font-sans">
-                        {selectedImovel.urlFotoDestaque && (
-                            <img src={selectedImovel.urlFotoDestaque} alt={selectedImovel.nomeImovel} className="w-full h-32 object-cover rounded-t-md" />
-                        )}
-                        <div className="p-3">
-                            <h3 className="font-bold text-base mb-1">{selectedImovel.nomeImovel}</h3>
-                            <p className="text-xs text-muted-foreground mb-2">{selectedImovel.endereco}, {selectedImovel.nomeBairro}</p>
-                            <p className="text-lg font-bold text-primary">
-                                {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(selectedImovel.preco)}
-                            </p>
+                    <div style={{ transform: 'translate(-50%, -110%)' }}>
+                        <div className="relative font-sans bg-background text-foreground rounded-lg shadow-2xl w-72 overflow-hidden border border-border">
+                            <button
+                                onClick={() => setSelectedImovel(null)}
+                                className="absolute top-2 right-2 p-1 rounded-full bg-background/50 text-foreground/70 hover:bg-background hover:text-foreground transition-all"
+                                aria-label="Fechar popup"
+                            >
+                                <X size={16} />
+                            </button>
+
+                            {selectedImovel.urlFotoDestaque && (
+                                <img src={selectedImovel.urlFotoDestaque} alt={selectedImovel.nomeImovel} className="w-full h-32 object-cover" />
+                            )}
+                            <div className="p-4">
+                                <div className="mb-3">
+                                    <h3 className="font-bold text-lg leading-tight">{selectedImovel.nomeImovel.toUpperCase()}</h3>
+                                    <p className="text-sm text-muted-foreground">{selectedImovel.construtora}</p>
+                                </div>
+
+                                <p className="text-sm my-1">
+                                    Total de <b className="text-foreground">{selectedImovel.unidadesTotal}</b> unidades,
+                                    <b className={selectedImovel.unidadesDisponiveis > 0 ? 'text-green-500' : 'text-red-500'}> {selectedImovel.unidadesDisponiveis > 0 ? selectedImovel.unidadesDisponiveis : 'nenhuma'}</b> disponível,
+                                    <b className="text-foreground"> {selectedImovel.unidadesTotal - selectedImovel.unidadesDisponiveis}</b> vendidas
+                                </p>
+
+                                <div className="border-t my-3"></div>
+
+                                <div className="text-sm space-y-1">
+                                    <p><b>Quartos:</b> {selectedImovel.quartos}</p>
+                                    <p><b>Área (m²):</b> {selectedImovel.area.toFixed(1).replace('.', ',')}</p>
+                                    <p><b>Valor (R$):</b> {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(selectedImovel.preco)}</p>
+                                    <p><b>VGV Total (R$):</b> {selectedImovel.vgv}</p>
+                                    <p><b>Categoria:</b> {selectedImovel.categoria}</p>
+                                    <p><b>Estágio:</b> {selectedImovel.estagio}</p>
+                                </div>
+
+                                <div className="mt-4">
+                                    <a
+                                        href={selectedImovel.urlFicha}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="block w-full text-center px-4 py-2 bg-primary text-primary-foreground font-bold rounded-md hover:bg-primary/90 transition-colors no-underline"
+                                    >
+                                        Ficha do Empreendimento
+                                    </a>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </InfoWindowF>
+                </OverlayView>
             )}
         </GoogleMap>
     );

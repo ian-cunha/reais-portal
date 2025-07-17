@@ -6,13 +6,21 @@
     :root {
         --background: 0 0% 100%;
         --foreground: 224 71.4% 4.1%;
-        --primary: 220 90% 50%;
+
+        /* Cor primária alterada para o seu laranja */
+        --primary: 21 95.2% 53.9%;
+        /* #fa581a */
         --primary-foreground: 0 0% 100%;
+        /* Branco para texto no laranja */
+
         --muted: 210 40% 96.1%;
         --muted-foreground: 215.4 16.3% 46.9%;
         --border: 214.3 31.8% 91.4%;
         --input: 214.3 31.8% 91.4%;
-        --ring: 220 90% 50%;
+
+        /* Anel de foco também alterado para laranja */
+        --ring: 21 95.2% 53.9%;
+
         --accent: 210 40% 96.1%;
         --accent-foreground: 224 71.4% 4.1%;
         --radius: 0.5rem;
@@ -21,18 +29,40 @@
     .dark {
         --background: 224 71.4% 4.1%;
         --foreground: 210 40% 98%;
-        --primary: 217.2 91.2% 59.8%;
+
+        /* Cor primária para o modo escuro (um laranja mais vibrante) */
+        --primary: 24 95% 65%;
         --primary-foreground: 222.2 47.4% 11.2%;
+
         --muted: 217.2 32.6% 17.5%;
         --muted-foreground: 215 20.2% 65.1%;
         --border: 217.2 32.6% 17.5%;
         --input: 217.2 32.6% 17.5%;
-        --ring: 217.2 91.2% 83.9%;
+
+        /* Anel de foco para o modo escuro */
+        --ring: 24 95% 65%;
+
         --accent: 217.2 32.6% 17.5%;
         --accent-foreground: 210 40% 98%;
     }
 
     body {
         @apply bg-background text-foreground;
+    }
+}
+
+@layer utilities {
+    @keyframes spin-around {
+        from {
+            transform: rotate(0deg);
+        }
+
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    .animate-spin-around {
+        animation: spin-around 1s linear infinite;
     }
 }
