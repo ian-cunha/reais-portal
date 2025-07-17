@@ -5,7 +5,8 @@ import type {
 } from '../types/api'
 
 const API_BASE_URL_HTTPS = "https://app.reaisystems.com.br/sites/v1"
-const API_TOKEN = "fDDqkA6DK22iWUXnH4jn4MpKJIy1mpXuB5fE6jdj"
+// TOKEN CORRIGIDO: Este é o token que foi usado com sucesso anteriormente.
+const API_TOKEN = "YMurVHvbtAxPRZRLejSwpCHlN8nkmk2fLOx9rBRO"
 
 class ApiError extends Error {
     constructor(
@@ -34,12 +35,13 @@ async function apiRequest<T>(url: string): Promise<T> {
 
         const data = await response.json();
         if (data.mensagem !== "sucesso") {
-            throw new ApiError(data.mensagem || "Erro na API");
+            // Se a API retornar um erro específico (como token inválido), mostre-o.
+            throw new ApiError(data.mensagem || "Erro na resposta da API");
         }
 
         return data;
     } catch (error) {
-        console.error("❌ API Error:", { url, error: error instanceof Error ? error.message : error });
+        console.error("❌ API Error:", { url, error: error instanceof Error ? error.message : "Erro desconhecido" });
         if (error instanceof ApiError) {
             throw error;
         }
@@ -52,7 +54,8 @@ export async function listarImoveis(filtro: FiltroImovel): Promise<Imovel[]> {
     const data = await apiRequest<ApiResponse<Imovel[]>>(
         `${API_BASE_URL_HTTPS}/imovel/listarImoveisFiltro?filtro=${filtroJson}`,
     );
-    return data.imoveis as Imovel[];
+    // Assegura que o retorno seja sempre um array, mesmo que a API falhe
+    return (data.imoveis as Imovel[]) || [];
 }
 
 export function criarFiltroImovel(params: Partial<FiltroImovel> = {}): FiltroImovel {

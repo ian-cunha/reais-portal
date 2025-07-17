@@ -1,120 +1,137 @@
 "use client";
 
-import { useEffect, useRef } from 'react';
-import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
+import React, { useState, useCallback } from 'react';
+import { GoogleMap, useJsApiLoader, MarkerF, InfoWindowF } from '@react-google-maps/api';
+import { useTheme } from 'next-themes';
 import useSWR from 'swr';
 import { Imovel } from '../types/api';
 
-// --- INÍCIO DA CORREÇÃO ---
-
-// 1. Criar um ícone de casa personalizado
-const houseIcon = new L.Icon({
-    iconUrl: 'data:image/svg+xml;base64,' + btoa(`
-        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="#2563EB" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-home">
-            <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-            <polyline points="9 22 9 12 15 12 15 22"/>
-        </svg>
-    `),
-    iconSize: [32, 32], // Tamanho do ícone
-    iconAnchor: [16, 32], // Ponto do ícone que corresponderá à localização do marcador
-    popupAnchor: [0, -32] // Ponto a partir do qual o popup deve abrir em relação ao iconAnchor
-});
-
-// 2. Corrigir o ícone padrão para o caso de o ícone da casa falhar
-const DefaultIcon = L.icon({
-    iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
-    shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41],
-});
-
-// --- FIM DA CORREÇÃO ---
-
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
+
+const containerStyle: React.CSSProperties = {
+    width: '100vw',
+    height: '100vh'
+};
+
+const center = {
+    lat: -8.047562,
+    lng: -34.877022
+};
+
+// Estilos para o mapa claro
+const lightMapStyles: google.maps.MapTypeStyle[] = [
+    { featureType: "poi.business", stylers: [{ visibility: "off" }] },
+    { featureType: "road", elementType: "labels.icon", stylers: [{ visibility: "off" }] }
+];
+
+// Estilos para o mapa escuro
+const darkMapStyles: google.maps.MapTypeStyle[] = [
+    { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
+    { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
+    { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
+    {
+        featureType: "administrative.locality",
+        elementType: "labels.text.fill",
+        stylers: [{ color: "#d59563" }],
+    },
+    { featureType: "poi", elementType: "labels.text.fill", stylers: [{ color: "#d59563" }] },
+    { featureType: "poi.business", stylers: [{ "visibility": "off" }] },
+    { featureType: "poi.park", elementType: "geometry", stylers: [{ color: "#263c3f" }] },
+    { featureType: "poi.park", elementType: "labels.text.fill", stylers: [{ color: "#6b9a76" }] },
+    { featureType: "road", elementType: "geometry", stylers: [{ color: "#38414e" }] },
+    { featureType: "road", elementType: "geometry.stroke", stylers: [{ color: "#212a37" }] },
+    { featureType: "road", elementType: "labels.text.fill", stylers: [{ color: "#9ca5b3" }] },
+    { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#746855" }] },
+    { featureType: "road.highway", elementType: "geometry.stroke", stylers: [{ color: "#1f2835" }] },
+    { featureType: "road.highway", elementType: "labels.text.fill", stylers: [{ color: "#f3d19c" }] },
+    { featureType: "transit", elementType: "geometry", stylers: [{ color: "#2f3948" }] },
+    { featureType: "transit.station", elementType: "labels.text.fill", stylers: [{ color: "#d59563" }] },
+    { featureType: "water", elementType: "geometry", stylers: [{ color: "#17263c" }] },
+    { featureType: "water", elementType: "labels.text.fill", stylers: [{ color: "#515c6d" }] },
+    { featureType: "water", elementType: "labels.text.stroke", stylers: [{ color: "#17263c" }] },
+];
 
 interface MapProps {
     searchTerm: string;
 }
 
 const Map = ({ searchTerm }: MapProps) => {
-    const mapRef = useRef<L.Map | null>(null);
-    const mapContainerRef = useRef<HTMLDivElement>(null);
-    const markersRef = useRef<L.FeatureGroup>(new L.FeatureGroup());
+    const { theme } = useTheme();
+    const { isLoaded, loadError } = useJsApiLoader({
+        id: 'google-map-script',
+        googleMapsApiKey: process.env.NEXT_PUBLIC_Maps_API_KEY || ""
+    });
 
-    const { data: imoveis, error } = useSWR<Imovel[]>(
+    const [selectedImovel, setSelectedImovel] = useState<Imovel | null>(null);
+
+    const { data: imoveis, error: swrError } = useSWR<Imovel[]>(
         `/api/imoveis?termo=${searchTerm}`,
         fetcher
     );
 
-    useEffect(() => {
-        if (mapContainerRef.current && !mapRef.current) {
-            mapRef.current = L.map(mapContainerRef.current, {
-                center: [-8.047562, -34.877022],
-                zoom: 13,
-            });
+    const mapOptions = {
+        disableDefaultUI: true,
+        zoomControl: true,
+        styles: theme === 'dark' ? darkMapStyles : lightMapStyles,
+    };
 
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-            }).addTo(mapRef.current);
-
-            if (mapRef.current) {
-                markersRef.current.addTo(mapRef.current);
-            }
-        }
-    }, []);
-
-    useEffect(() => {
-        if (!mapRef.current || !imoveis) return;
-
-        markersRef.current.clearLayers();
-
-        imoveis.forEach((imovel) => {
-            const [lat, lng] = imovel.localizacao.split(',').map(Number);
-            if (!isNaN(lat) && !isNaN(lng)) {
-                // 3. Aplicar o ícone de casa a cada marcador
-                const marker = L.marker([lat, lng], { icon: houseIcon });
-
-                const popupContent = `
-                    <div style="max-width: 250px;">
-                        <h3 style="font-weight: bold; margin-bottom: 4px;">${imovel.nomeImovel}</h3>
-                        <p style="font-size: 0.8rem; margin: 0;">${imovel.endereco}, ${imovel.nomeBairro}</p>
-                        <p style="font-size: 1.1rem; font-weight: bold; color: #2563EB; margin-top: 8px;">
-                            ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(imovel.preco)}
-                        </p>
-                        ${imovel.urlFotoDestaque ? `<img src="${imovel.urlFotoDestaque}" alt="${imovel.nomeImovel}" style="width: 100%; height: 120px; object-fit: cover; margin-top: 8px; border-radius: 4px;" />` : ''}
-                    </div>
-                `;
-
-                marker.bindPopup(popupContent);
-                markersRef.current.addLayer(marker);
-            }
-        });
-
-        if (imoveis.length > 0 && markersRef.current.getLayers().length > 0) {
-            mapRef.current.fitBounds(markersRef.current.getBounds(), { padding: [50, 50] });
-        }
-
-    }, [imoveis]);
-
-    if (error) {
-        return <div className="p-4 text-red-500">Falha ao carregar imóveis.</div>;
-    }
-
-    // Adicionado um estado de carregamento para melhor feedback ao usuário
-    if (!imoveis) {
-        return (
-            <div style={{ height: '100vh', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <p>Carregando imóveis no mapa...</p>
-            </div>
-        );
-    }
+    if (loadError) return <div>Erro ao carregar o mapa. Verifique a sua chave de API.</div>;
+    if (!isLoaded) return <div>A carregar API do mapa...</div>;
 
     return (
-        <div ref={mapContainerRef} style={{ height: '100vh', width: '100%' }} />
+        <GoogleMap
+            mapContainerStyle={containerStyle}
+            center={center}
+            zoom={12}
+            options={mapOptions}
+        >
+            {imoveis?.map((imovel) => {
+                const [lat, lng] = imovel.localizacao.split(',').map(Number);
+                if (isNaN(lat) || isNaN(lng)) return null;
+
+                return (
+                    <MarkerF
+                        key={imovel.codigoImovel}
+                        position={{ lat, lng }}
+                        onClick={() => setSelectedImovel(imovel)}
+                        icon={{
+                            url: 'data:image/svg+xml;base64,' + btoa(`
+                                <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="${theme === 'dark' ? '#A5B4FC' : '#1D4ED8'}" stroke="${theme === 'dark' ? '#1E293B' : 'white'}" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                                    <polyline points="9 22 9 12 15 12 15 22"/>
+                                </svg>
+                            `),
+                            scaledSize: new window.google.maps.Size(36, 36)
+                        }}
+                    />
+                );
+            })}
+
+            {selectedImovel && (
+                <InfoWindowF
+                    position={{
+                        lat: parseFloat(selectedImovel.localizacao.split(',')[0]),
+                        lng: parseFloat(selectedImovel.localizacao.split(',')[1])
+                    }}
+                    onCloseClick={() => setSelectedImovel(null)}
+                    options={{ pixelOffset: new window.google.maps.Size(0, -38) }}
+                >
+                    <div className="bg-background text-foreground p-1 font-sans">
+                        {selectedImovel.urlFotoDestaque && (
+                            <img src={selectedImovel.urlFotoDestaque} alt={selectedImovel.nomeImovel} className="w-full h-32 object-cover rounded-t-md" />
+                        )}
+                        <div className="p-3">
+                            <h3 className="font-bold text-base mb-1">{selectedImovel.nomeImovel}</h3>
+                            <p className="text-xs text-muted-foreground mb-2">{selectedImovel.endereco}, {selectedImovel.nomeBairro}</p>
+                            <p className="text-lg font-bold text-primary">
+                                {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(selectedImovel.preco)}
+                            </p>
+                        </div>
+                    </div>
+                </InfoWindowF>
+            )}
+        </GoogleMap>
     );
 };
 
-export default Map;
+export default React.memo(Map);

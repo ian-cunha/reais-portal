@@ -16,23 +16,27 @@ export function SearchBar({ onSearch }: SearchBarProps) {
     };
 
     return (
-        <form
-            onSubmit={handleSearch}
-            className="flex w-full max-w-lg mx-auto bg-white rounded-full shadow-lg"
-        >
-            <input
-                type="text"
-                value={term}
-                onChange={(e) => setTerm(e.target.value)}
-                placeholder="Buscar por bairro, cidade, código..."
-                className="w-full px-6 py-3 text-gray-700 rounded-l-full focus:outline-none"
-            />
-            <button
-                type="submit"
-                className="px-6 py-3 text-white bg-blue-600 rounded-r-full hover:bg-blue-700 focus:outline-none"
+        // Aplicando estilos diretamente para garantir a aplicação
+        <div className="w-full">
+            <form
+                onSubmit={handleSearch}
+                className="flex w-full items-center rounded-full bg-background shadow-lg border border-border transition-all duration-300 focus-within:ring-2 focus-within:ring-ring focus-within:shadow-xl"
             >
-                <Search size={20} />
-            </button>
-        </form>
+                <input
+                    type="text"
+                    value={term}
+                    onChange={(e) => setTerm(e.target.value)}
+                    placeholder="Buscar por bairro, cidade ou código..."
+                    className="h-12 w-full flex-grow appearance-none bg-transparent px-6 text-foreground placeholder-muted-foreground focus:outline-none"
+                />
+                <button
+                    type="submit"
+                    className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground transition-colors hover:bg-primary/90"
+                    aria-label="Buscar"
+                >
+                    <Search size={20} />
+                </button>
+            </form>
+        </div>
     );
 }
