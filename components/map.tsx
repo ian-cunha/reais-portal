@@ -53,11 +53,6 @@ const containerStyle: React.CSSProperties = {
     height: '88vh'
 };
 
-const center = {
-    lat: -5.8,
-    lng: -39.0
-};
-
 const lightMapStyles: google.maps.MapTypeStyle[] = [
     { featureType: "poi.business", stylers: [{ visibility: "off" }] },
     { featureType: "road", elementType: "labels.icon", stylers: [{ visibility: "off" }] }
@@ -79,9 +74,11 @@ const darkMapStyles: google.maps.MapTypeStyle[] = [
 
 interface MapProps {
     searchTerm: string;
+    center: { lat: number; lng: number };
+    zoom: number;
 }
 
-const Map = ({ searchTerm }: MapProps) => {
+const Map = ({ searchTerm, center, zoom }: MapProps) => {
     const { theme } = useTheme();
     const [map, setMap] = useState<google.maps.Map | null>(null);
     const { isLoaded, loadError } = useJsApiLoader({
@@ -102,6 +99,14 @@ const Map = ({ searchTerm }: MapProps) => {
         styles: theme === 'dark' ? darkMapStyles : lightMapStyles,
         gestureHandling: isDesktop ? 'cooperative' : 'greedy',
     };
+
+    useEffect(() => {
+        if (map) {
+            map.panTo(center);
+            map.setZoom(zoom);
+        }
+    }, [center, zoom, map]);
+
 
     useEffect(() => {
         if (isDesktop && map && selectedImovel) {
@@ -185,7 +190,7 @@ const Map = ({ searchTerm }: MapProps) => {
             <GoogleMap
                 mapContainerStyle={containerStyle}
                 center={center}
-                zoom={6}
+                zoom={zoom}
                 options={mapOptions}
                 onLoad={onLoad}
                 onUnmount={onUnmount}
