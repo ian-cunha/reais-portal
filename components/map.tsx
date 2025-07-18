@@ -50,7 +50,7 @@ const imovelIcon = () => `
 
 const containerStyle: React.CSSProperties = {
     width: '100vw',
-    height: '100vh'
+    height: '88vh'
 };
 
 const center = {
@@ -86,7 +86,7 @@ const Map = ({ searchTerm }: MapProps) => {
     const [map, setMap] = useState<google.maps.Map | null>(null);
     const { isLoaded, loadError } = useJsApiLoader({
         id: 'google-map-script',
-        googleMapsApiKey: process.env.NEXT_PUBLIC_Maps_API_KEY || "",
+        googleMapsApiKey: process.env.NEXT_PUBLIC_Maps_API_KEY || "AIzaSyCI1EDQZhIQXj165PIfJisA3FIvjLpql4Y",
         libraries: ['marker'],
     });
 

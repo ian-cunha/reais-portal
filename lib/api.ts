@@ -10,7 +10,7 @@ const imoveisEstaticos: Imovel[] = [
         localizacao: "-8.033620, -34.912957", // Recife
         preco: 2500000,
         urlFotoDestaque: "https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-        tipo: 'casa',
+        tipo: 'imovel',
         urlFicha: 'https://app.reaisystems.com.br/imovel/fichaPublica/RECIFE_CASA_01',
         unidadesTotal: 1,
         unidadesDisponiveis: 1,
@@ -45,7 +45,7 @@ const imoveisEstaticos: Imovel[] = [
         localizacao: "-3.723049, -38.487843", // Fortaleza, CE
         preco: 3100000,
         urlFotoDestaque: "https://images.pexels.com/photos/164558/pexels-photo-164558.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-        tipo: 'casa',
+        tipo: 'imovel',
         urlFicha: 'https://app.reaisystems.com.br/imovel/fichaPublica/FORTALEZA_CASA_01',
         unidadesTotal: 1,
         unidadesDisponiveis: 1,
@@ -97,7 +97,7 @@ const imoveisEstaticos: Imovel[] = [
         localizacao: "-7.116538, -34.825226", // João Pessoa, PB
         preco: 890000,
         urlFotoDestaque: "https://images.pexels.com/photos/277667/pexels-photo-277667.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-        tipo: 'casa',
+        tipo: 'imovel',
         urlFicha: 'https://app.reaisystems.com.br/imovel/fichaPublica/JOAOPESSOA_CASA_01',
         unidadesTotal: 1,
         unidadesDisponiveis: 1,
