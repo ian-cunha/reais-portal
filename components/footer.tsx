@@ -6,7 +6,7 @@ export function Footer() {
         <footer className="w-full bg-background p-4 shadow-inner">
             <div className="mx-auto flex max-w-7xl items-center justify-between text-xs text-muted-foreground">
                 <div className="flex items-center gap-2">
-                    <span>© {new Date().getFullYear()} RE.AI.s LISTING</span>
+                    <span>© {new Date().getFullYear()} Real Estate AI Planner LTDA</span>
                     <span>-</span>
                     <span>v{packageJson.version}</span>
                 </div>
