@@ -4,9 +4,9 @@ import { useState, Suspense } from 'react';
 import dynamic from 'next/dynamic';
 import { Navbar } from '../components/navbar';
 import { SearchBar } from '../components/search-bar';
-import { ThemeToggle } from '../components/theme-toggle';
 import { Footer } from '../components/footer';
 import { LoadingIndicator } from '../components/loading-indicator';
+import { FilterButtons } from '../components/filter-buttons';
 
 const MapWithNoSSR = dynamic(() => import('../components/map'), {
     ssr: false,
@@ -25,15 +25,15 @@ export default function HomePage() {
                     <MapWithNoSSR searchTerm={searchTerm} />
                 </Suspense>
 
-                {/* Barra de pesquisa flutuante sobre o mapa */}
+                {/* Conteúdo flutuante sobre o mapa */}
                 <div className="absolute top-0 left-0 right-0 z-10 p-4 pointer-events-none">
-                    <div className="mx-auto flex max-w-xl items-center justify-center gap-4 pointer-events-auto">
-                        <div className="flex-grow">
-                            <SearchBar onSearch={setSearchTerm} />
+                    <div className="mx-auto flex max-w-xl flex-col items-center justify-center gap-2 pointer-events-auto">
+                        <div className="w-full flex items-center gap-4">
+                            <div className="flex-grow">
+                                <SearchBar onSearch={setSearchTerm} />
+                            </div>
                         </div>
-                        <div className="flex-shrink-0">
-                            <ThemeToggle />
-                        </div>
+                        <FilterButtons />
                     </div>
                 </div>
             </main>

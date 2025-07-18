@@ -1,17 +1,22 @@
 export interface Imovel {
+    idImv: number;
+    idEmpreendimento: number | null;
+    isEmpreendimento: boolean;
     codigoImovel: string;
     nomeImovel: string;
-    construtora: string;
-    preco: number;
-    localizacao: string; // "lat,lng"
+    nomeEmpresa: string;
+    preco: any;
+    latitude: number;
+    longitude: number;
     urlFotoDestaque: string;
-    tipo: 'imovel' | 'empreendimento';
     urlFicha: string;
-    unidadesTotal: number;
+    tipo: string;
+    subTipo: string;
     unidadesDisponiveis: number;
+    unidadesTotal: number;
     quartos: number;
-    area: number;
-    vgv: string;
-    categoria: string;
+    areaUtil: number;
+    areaTotal: number;
+    vgv: number;
     estagio: string;
 }

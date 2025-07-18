@@ -16,7 +16,7 @@ export function ThemeToggle() {
 
     return (
         <button
-            className="opacity-60 hover:opacity-100 focus-within:opacity-100 w-10 h-10 flex items-center justify-center bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-sm shadow-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="transition-opacity duration-300 opacity-60 hover:opacity-100 focus-within:opacity-100 w-10 h-10 flex items-center justify-center bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-sm shadow-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
             aria-label="Alternar tema"
         >

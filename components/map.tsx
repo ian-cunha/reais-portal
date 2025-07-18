@@ -103,9 +103,21 @@ const Map = ({ searchTerm }: MapProps) => {
         gestureHandling: isDesktop ? 'cooperative' : 'greedy',
     };
 
+    useEffect(() => {
+        if (isDesktop && map && selectedImovel) {
+            const { latitude, longitude } = selectedImovel;
+            const targetLatLng = new google.maps.LatLng(latitude, longitude);
+            map.panTo(targetLatLng);
 
-    const getIcon = (tipo: 'imovel' | 'empreendimento') => {
-        const svg = tipo === 'empreendimento' ? empreendimentoIcon() : imovelIcon();
+            setTimeout(() => {
+                map.panBy(0, -150);
+            }, 100);
+        }
+    }, [selectedImovel, map, isDesktop]);
+
+
+    const getIcon = (isEmpreendimento: boolean) => {
+        const svg = isEmpreendimento ? empreendimentoIcon() : imovelIcon();
         return {
             url: 'data:image/svg+xml;base64,' + btoa(svg),
             scaledSize: new window.google.maps.Size(36, 36)
@@ -135,7 +147,7 @@ const Map = ({ searchTerm }: MapProps) => {
             <div className="p-4 overflow-y-auto">
                 <div className="mb-3">
                     <h3 className="font-bold text-lg leading-tight">{imovel.nomeImovel.toUpperCase()}</h3>
-                    <p className="text-sm text-muted-foreground">{imovel.construtora}</p>
+                    <p className="text-sm text-muted-foreground">{imovel.nomeEmpresa}</p>
                 </div>
                 <p className="text-sm my-1">
                     Total de <b className="text-foreground">{imovel.unidadesTotal}</b> unidades,
@@ -145,10 +157,10 @@ const Map = ({ searchTerm }: MapProps) => {
                 <div className="border-t my-3"></div>
                 <div className="text-sm space-y-1">
                     <p><b>Quartos:</b> {imovel.quartos}</p>
-                    <p><b>Área (m²):</b> {imovel.area.toFixed(1).replace('.', ',')}</p>
+                    <p><b>Área (m²):</b> {imovel.areaUtil.toFixed(1).replace('.', ',')}</p>
                     <p><b>Valor (R$):</b> {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(imovel.preco)}</p>
-                    <p><b>VGV Total (R$):</b> {imovel.vgv}</p>
-                    <p><b>Categoria:</b> {imovel.categoria}</p>
+                    <p><b>VGV Total (R$):</b> {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(imovel.vgv)}</p>
+                    <p><b>Categoria:</b> {imovel.tipo}</p>
                     <p><b>Estágio:</b> {imovel.estagio}</p>
                 </div>
                 <div className="mt-4">
@@ -183,18 +195,18 @@ const Map = ({ searchTerm }: MapProps) => {
                     {(clusterer) => (
                         <>
                             {imoveis?.map((imovel) => {
-                                const [lat, lng] = imovel.localizacao.split(',').map(Number);
-                                if (isNaN(lat) || isNaN(lng)) return null;
+                                const { latitude, longitude } = imovel;
+                                if (isNaN(latitude) || isNaN(longitude)) return null;
 
                                 return (
                                     <MarkerF
                                         key={imovel.codigoImovel}
-                                        position={{ lat, lng }}
+                                        position={{ lat: latitude, lng: longitude }}
                                         onClick={(e) => {
                                             e.domEvent.stopPropagation();
                                             setSelectedImovel(imovel)
                                         }}
-                                        icon={getIcon(imovel.tipo)}
+                                        icon={getIcon(imovel.isEmpreendimento)}
                                         clusterer={clusterer}
                                     />
                                 );
@@ -208,8 +220,8 @@ const Map = ({ searchTerm }: MapProps) => {
                         // --- VERSÃO DESKTOP ---
                         <OverlayView
                             position={{
-                                lat: parseFloat(selectedImovel.localizacao.split(',')[0]),
-                                lng: parseFloat(selectedImovel.localizacao.split(',')[1])
+                                lat: selectedImovel.latitude,
+                                lng: selectedImovel.longitude
                             }}
                             mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
                         >
