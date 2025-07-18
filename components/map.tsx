@@ -170,7 +170,7 @@ const Map = ({ searchTerm }: MapProps) => {
                         rel="noopener noreferrer"
                         className="block w-full text-center px-4 py-2 bg-primary text-primary-foreground font-bold rounded-sm hover:bg-primary/90 transition-colors no-underline"
                     >
-                        Ficha do Empreendimento
+                        Ver mais detalhes
                     </a>
                 </div>
             </div>
